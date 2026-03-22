@@ -1,6 +1,6 @@
-package com.n2t.autocart.modules.address.repository;
+package com.n2t.autocart.modules.location.repository;
 
-import com.n2t.autocart.modules.address.entity.District;
+import com.n2t.autocart.modules.location.entity.District;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

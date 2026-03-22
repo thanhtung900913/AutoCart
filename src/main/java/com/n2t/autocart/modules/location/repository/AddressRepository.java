@@ -1,9 +1,9 @@
-package com.n2t.autocart.modules.address.repository;
+package com.n2t.autocart.modules.location.repository;
 
-import com.n2t.autocart.modules.address.entity.Address;
+import com.n2t.autocart.modules.location.entity.Address;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-interface AddressRepository extends JpaRepository<Address, Integer> {
+public interface AddressRepository extends JpaRepository<Address, Integer> {
 }

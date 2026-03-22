@@ -1,7 +1,15 @@
-package com.n2t.autocart.modules.address.repository;
+package com.n2t.autocart.modules.location.repository;
 
-import com.n2t.autocart.modules.address.entity.Ward;
+import com.n2t.autocart.modules.location.entity.Ward;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-interface WardRepository extends JpaRepository<Ward, Integer> {
+import java.util.List;
+
+public interface WardRepository extends JpaRepository<Ward, Integer> {
+    List<Ward> findByDistrict_DistrictId(Integer districtId);
+    boolean existsByWardIdAndDistrict_DistrictIdAndProvince_ProvinceId(
+            Integer wardId,
+            Integer districtId,
+            Integer provinceId
+    );
 }
