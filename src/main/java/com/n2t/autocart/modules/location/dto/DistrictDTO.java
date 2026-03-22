@@ -1,21 +1,8 @@
-package com.n2t.autocart.modules.address.dto;
+package com.n2t.autocart.modules.location.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
-public class DistrictDTO {
-
-    private Integer districtId;
-
-    private String districtName;
-
-    private String districtNameEn;
-
-    private String type;
-}
+public record DistrictDTO(
+    Integer districtId,
+    String districtName,
+    String districtNameEn,
+    String type
+) {}
