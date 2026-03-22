@@ -1,4 +1,4 @@
-package com.n2t.autocart.modules.address.entity;
+package com.n2t.autocart.modules.location.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

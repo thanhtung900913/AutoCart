@@ -14,7 +14,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 ErrorCode.UNCATEGORIZED_EXCEPTION.name(),
-                ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage(),
+                exception.getMessage(),
                 request.getRequestURI()
         );
 

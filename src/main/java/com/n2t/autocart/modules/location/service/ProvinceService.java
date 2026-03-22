@@ -1,7 +1,7 @@
-package com.n2t.autocart.modules.address.service;
+package com.n2t.autocart.modules.location.service;
 
-import com.n2t.autocart.modules.address.entity.Province;
-import com.n2t.autocart.modules.address.repository.ProvinceRepository;
+import com.n2t.autocart.modules.location.entity.Province;
+import com.n2t.autocart.modules.location.repository.ProvinceRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

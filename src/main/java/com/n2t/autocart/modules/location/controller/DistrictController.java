@@ -1,8 +1,8 @@
-package com.n2t.autocart.modules.address.controller;
+package com.n2t.autocart.modules.location.controller;
 
-import com.n2t.autocart.modules.address.dto.DistrictDTO;
-import com.n2t.autocart.modules.address.entity.District;
-import com.n2t.autocart.modules.address.service.DistrictService;
+import com.n2t.autocart.modules.location.dto.DistrictDTO;
+import com.n2t.autocart.modules.location.entity.District;
+import com.n2t.autocart.modules.location.service.DistrictService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/address")
+@RequestMapping("/api/v1/locations")
 public class DistrictController {
     private final DistrictService districtService;
 
@@ -21,7 +21,7 @@ public class DistrictController {
     }
     @GetMapping("/provinces/{provinceId}/districts")
     public ResponseEntity<List<DistrictDTO>> getDistrictByProvinceId(@PathVariable Integer provinceId){
-        List<District> districts = districtService.getDistrict(provinceId);
+        List<District> districts = districtService.getAllDistrictsByProvinceId(provinceId);
         if(districts.isEmpty()){
             throw new RuntimeException();
         }

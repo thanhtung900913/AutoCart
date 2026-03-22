@@ -1,4 +1,4 @@
-package com.n2t.autocart.modules.address.entity;
+package com.n2t.autocart.modules.location.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
@@ -44,4 +44,7 @@ public class Address {
     @JoinColumn(name = "ward_id")
     @JsonIgnore
     private Ward ward;
+
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 }

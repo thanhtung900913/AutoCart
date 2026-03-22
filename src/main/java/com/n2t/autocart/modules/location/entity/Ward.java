@@ -1,4 +1,4 @@
-package com.n2t.autocart.modules.address.entity;
+package com.n2t.autocart.modules.location.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
