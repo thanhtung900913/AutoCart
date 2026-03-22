@@ -1,0 +1,290 @@
+// Tên dự án: auto_cart
+// Docs: https://dbml.dbdiagram.io/docs
+
+// ==========================================
+// ĐỊA CHỈ (GEOGRAPHY)
+// ==========================================
+Table provinces {
+  province_id integer [primary key]
+  province_name varchar [not null]
+  province_name_en varchar [not null]
+  type varchar [not null]
+}
+
+Table districts {
+  district_id integer [primary key]
+  district_name varchar [not null]
+  district_name_en varchar [not null]
+  type varchar [not null]
+  province_id_id integer [not null]
+}
+
+Table wards {
+  ward_id integer [primary key]
+  ward_name varchar [not null]
+  ward_name_en varchar [not null]
+  type varchar [not null]
+  district_id_id integer [not null]
+  province_id_id integer [not null]
+}
+
+Table addresses {
+  address_id integer [primary key]
+  address_detail varchar
+  district_id integer
+  province_id integer
+  ward_id integer
+}
+
+// ==========================================
+// TÀI KHOẢN & BẢO MẬT (AUTH & RBAC)
+// ==========================================
+Table users {
+  id bigint [primary key]
+  password varchar [not null]
+  last_login timestamp
+  email varchar [unique, not null]
+  address_id integer [unique]
+}
+
+Table refresh_tokens {
+  token_id bigint [primary key]
+  user_id bigint [not null]
+  token varchar [unique, not null]
+  expires_at timestamp [not null]
+  created_at timestamp [default: `now()`]
+  is_revoked boolean [default: false]
+}
+
+Table roles {
+  role_id integer [primary key]
+  role_name varchar [unique, not null] 
+  description varchar
+}
+
+Table permissions {
+  permission_id integer [primary key]
+  permission_name varchar [unique, not null]
+  description varchar
+}
+
+Table role_permissions {
+  role_id integer [not null]
+  permission_id integer [not null]
+  indexes {
+    (role_id, permission_id) [pk]
+  }
+}
+
+Table user_roles {
+  user_id bigint [not null]
+  role_id integer [not null]
+  indexes {
+    (user_id, role_id) [pk]
+  }
+}
+
+// ==========================================
+// THANH TOÁN (PAYMENTS & PAYOUTS) - NEW
+// ==========================================
+
+// Dành cho Customer lưu thẻ thanh toán (Ví dụ: Visa, thẻ ATM)
+Table payment_methods {
+  payment_method_id bigint [primary key]
+  user_id bigint [not null]
+  provider varchar [not null, note: 'Ví dụ: Visa, Mastercard, VNPay']
+  masked_account_number varchar [not null, note: 'Chỉ lưu 4 số cuối: ****1234']
+  card_holder_name varchar
+  expires_at date
+  is_default boolean [default: false]
+  created_at timestamp [default: `now()`]
+}
+
+// Dành cho Vendor nhận tiền thanh toán từ auto_cart
+Table vendor_payout_accounts {
+  payout_account_id integer [primary key]
+  vendor_id bigint [unique, not null]
+  bank_name varchar [not null]
+  account_number varchar [not null]
+  account_holder_name varchar [not null]
+  branch_name varchar
+}
+
+// ==========================================
+// THÔNG TIN NGƯỜI DÙNG (PROFILES)
+// ==========================================
+Table vendors {
+  id bigint [primary key]
+  name varchar
+  phone varchar
+  description text
+  logo_url varchar
+  date_join date [not null]
+  user_id bigint [unique, not null]
+}
+
+Table customers {
+  id bigint [primary key]
+  phone varchar
+  fullname varchar [not null]
+  date_of_birth date
+  age smallint [not null]
+  avatar_url varchar
+  date_join date [not null]
+  recommend_product_ids "integer[]" [not null]
+  cart_id integer [unique]
+  user_id bigint [unique]
+}
+
+// ==========================================
+// SẢN PHẨM & GIỎ HÀNG (CATALOG & CART)
+// ==========================================
+Table categories {
+  category_id integer [primary key]
+  category_name varchar [not null]
+  slug varchar [not null]
+  category_img_url varchar [not null]
+}
+
+Table products {
+  product_id integer [primary key]
+  product_name varchar [not null]
+  original_price decimal [not null]
+  stock integer [not null, note: 'CHECK (stock >= 0)']
+  brand varchar [not null]
+  slug varchar [not null]
+  product_description text [not null]
+  date_created date [not null]
+  ratings decimal [not null]
+  date_add date [not null]
+  category_id integer [not null]
+  vendor_id bigint [not null]
+}
+
+Table product_images {
+  product_image_id integer [primary key]
+  image_url varchar [not null]
+  is_main boolean [not null]
+  product_id_id integer [not null]
+}
+
+Table carts {
+  cart_id integer [primary key]
+  grand_total decimal [not null]
+  items_total integer [not null, note: 'CHECK (items_total >= 0)']
+}
+
+Table cart_products {
+  cart_product_id integer [primary key]
+  quantity integer [not null, note: 'CHECK (quantity >= 0)']
+  cart_id integer [not null]
+  product_id integer [not null]
+}
+
+// ==========================================
+// ĐƠN HÀNG & KHUYẾN MÃI (ORDERS & PROMOS)
+// ==========================================
+Table discounts {
+  discount_id integer [primary key]
+  name varchar [not null]
+  discount_percent decimal [not null]
+}
+
+Table order_product_discounts {
+  product_discount_id integer [primary key]
+  start_date date [not null]
+  end_date date [not null]
+  discount_id integer [not null]
+  product_id integer [not null]
+}
+
+Table orders {
+  order_id integer [primary key]
+  order_number varchar [unique, not null]
+  shipping_date date [not null]
+  order_date date [not null]
+  order_status varchar [not null]
+  order_total decimal [not null]
+  address_id integer
+  payment_method_id bigint [note: 'Phương thức dùng để thanh toán đơn này']
+  customer_id bigint [not null]
+}
+
+Table order_products {
+  order_product_id integer [primary key]
+  quantity integer [not null]
+  price decimal [not null]
+  order_id integer [not null]
+  product_id integer [not null]
+}
+
+Table transactions {
+  transaction_id integer [primary key]
+  transation_date timestamp [not null]
+  total_money decimal [not null]
+  status varchar [not null]
+  customer_id bigint [not null]
+  order_id integer [not null]
+}
+
+Table reviews {
+  review_id integer [primary key]
+  review_rating integer [not null]
+  review_date date [not null]
+  review_content text [not null]
+  customer_id_id bigint [not null]
+  product_id_id integer [not null]
+}
+
+// ==========================================
+// KẾT NỐI (RELATIONSHIPS / REFS)
+// ==========================================
+
+// --- Auth, Tokens & RBAC ---
+Ref: refresh_tokens.user_id > users.id
+Ref: role_permissions.role_id > roles.role_id
+Ref: role_permissions.permission_id > permissions.permission_id
+Ref: user_roles.user_id > users.id
+Ref: user_roles.role_id > roles.role_id
+
+// --- Address & Geography ---
+Ref: districts.province_id_id > provinces.province_id
+Ref: wards.district_id_id > districts.district_id
+Ref: wards.province_id_id > provinces.province_id
+Ref: addresses.district_id > districts.district_id
+Ref: addresses.province_id > provinces.province_id
+Ref: addresses.ward_id > wards.ward_id
+
+// --- Users, Profiles & Payments ---
+Ref: users.address_id - addresses.address_id
+Ref: vendors.user_id - users.id
+Ref: customers.user_id - users.id
+Ref: customers.cart_id - carts.cart_id
+Ref: payment_methods.user_id > users.id // Quan hệ 1-Nhiều (1 user có nhiều thẻ)
+Ref: vendor_payout_accounts.vendor_id - vendors.id
+
+// --- Products & Categories ---
+Ref: products.category_id > categories.category_id
+Ref: products.vendor_id > vendors.id
+Ref: product_images.product_id_id > products.product_id
+
+// --- Cart ---
+Ref: cart_products.cart_id > carts.cart_id
+Ref: cart_products.product_id > products.product_id
+
+// --- Discounts ---
+Ref: order_product_discounts.discount_id > discounts.discount_id
+Ref: order_product_discounts.product_id > products.product_id
+
+// --- Orders ---
+Ref: orders.address_id > addresses.address_id
+Ref: orders.customer_id > customers.id
+Ref: orders.payment_method_id > payment_methods.payment_method_id
+Ref: order_products.order_id > orders.order_id
+Ref: order_products.product_id > products.product_id
+
+// --- Transactions & Reviews ---
+Ref: transactions.customer_id > customers.id
+Ref: transactions.order_id > orders.order_id
+Ref: reviews.customer_id_id > customers.id
+Ref: reviews.product_id_id > products.product_id

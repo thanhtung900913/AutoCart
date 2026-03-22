@@ -1,0 +1,15 @@
+services:
+  postgres:
+    container_name: autocart-db
+    image: postgres:14.3
+    restart: always
+    environment:
+      POSTGRES_USER: development_admin
+      POSTGRES_PASSWORD: 900913
+      POSTGRES_DB: autocart
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+volumes:
+  data:
