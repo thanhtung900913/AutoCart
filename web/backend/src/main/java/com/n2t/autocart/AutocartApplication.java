@@ -9,5 +9,4 @@ public class AutocartApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AutocartApplication.class, args);
 	}
-
 }
