@@ -3,6 +3,7 @@ package com.n2t.autocart.modules.account.controller;
 import com.n2t.autocart.modules.account.dto.LoginRequestDTO;
 import com.n2t.autocart.modules.account.dto.LoginResponseDTO;
 import com.n2t.autocart.modules.account.dto.UserCreateRequest;
+import com.n2t.autocart.modules.account.dto.UserCreateResponse;
 import com.n2t.autocart.modules.account.entity.User;
 import com.n2t.autocart.modules.account.service.RefreshTokenService;
 import com.n2t.autocart.modules.account.service.UserService;
@@ -37,9 +38,10 @@ public class AuthController {
         this.refreshTokenService = refreshTokenService;
     }
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody UserCreateRequest request){
+    public ResponseEntity<UserCreateResponse> register(@RequestBody UserCreateRequest request){
         User user = userService.handleCreateUser(request);
-        return ResponseEntity.ok().body(user.toString());
+        UserCreateResponse responseDTO = new UserCreateResponse(user.getId(), user.getEmail());
+        return ResponseEntity.ok().body(responseDTO);
     }
 
     @PostMapping("/login")
