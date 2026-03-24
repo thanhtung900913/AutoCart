@@ -1,6 +1,7 @@
 package com.n2t.autocart.modules.location.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.n2t.autocart.modules.account.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -47,4 +48,9 @@ public class Address {
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
 }
