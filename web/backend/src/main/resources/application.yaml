@@ -6,11 +6,17 @@ spring:
     username: development_admin
     password: 900913
     driver-class-name: org.postgresql.Driver
-    jpa:
+  jpa:
+    hibernate:
+      ddl-auto: update # Options: none, update, create, create-drop, validate
+    show-sql: true
+    properties:
       hibernate:
-        ddl-auto: update # Options: none, update, create, create-drop, validate
-      show-sql: true
-      properties:
-        hibernate:
-          format_sql: true
+        format_sql: true
+
+auto-cart:
+  jwt:
+    base64-secret: "C08kY54CYcqaJDipJLDrboMws/B3YlAno+Exu+KNCFA="
+    access-token-validity-in-seconds: 86400
+    refresh-token-validity-in-seconds: 864000
 
