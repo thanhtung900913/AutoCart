@@ -1,6 +1,10 @@
 package com.n2t.autocart.security;
 
 import com.n2t.autocart.modules.account.dto.LoginResponseDTO;
+import com.n2t.autocart.modules.account.entity.Role;
+import com.n2t.autocart.modules.account.entity.User;
+import com.n2t.autocart.modules.account.repository.RoleRepository;
+import com.n2t.autocart.modules.account.repository.UserRepository;
 import com.nimbusds.jose.util.Base64;
 import lombok.Getter;
 import org.springframework.security.core.Authentication;
@@ -16,6 +20,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,20 +38,24 @@ public class SecurityUtil {
     private int refreshAxpiredTime;
 
     public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS256;
+    private final RoleRepository roleRepository;
 
-    public SecurityUtil(JwtEncoder jwtEncoder) {
+    public SecurityUtil(JwtEncoder jwtEncoder, RoleRepository roleRepository) {
         this.jwtEncoder = jwtEncoder;
+        this.roleRepository = roleRepository;
     }
-    public String createAccessToken(String email, LoginResponseDTO.UserResponse userResponse){
+
+    public String createAccessToken(String email){
         Instant now = Instant.now();
         Instant validity = now.plus(this.accessAxpiredTime, ChronoUnit.SECONDS);
-
-
+        List<String> roles = roleRepository.findDistinctByUserRoles_User_Email(email).stream()
+                .map(role -> "ROLE_" + role.getRoleName())
+                .toList();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
                 .expiresAt(validity)
                 .subject(email)
-                .claim("user", userResponse)
+                .claim("role", roles)
                 .build();
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
