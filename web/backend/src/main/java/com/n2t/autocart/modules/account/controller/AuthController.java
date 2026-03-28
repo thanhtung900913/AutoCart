@@ -53,7 +53,7 @@ public class AuthController {
         LoginResponseDTO res = new LoginResponseDTO();
         User user = userService.getUserByEmail(loginRequestDTO.email());
         res.setUserResponse(new LoginResponseDTO.UserResponse(user.getId(),user.getEmail()));
-        String accessToken = this.securityUtil.createAccessToken(authentication.getName(), res.getUserResponse());
+        String accessToken = this.securityUtil.createAccessToken(authentication.getName());
         res.setAccessToken(accessToken);
         String refreshToken = this.securityUtil.createRefreshToken(loginRequestDTO.email(), res);
         refreshTokenService.createRefreshToken(refreshToken, user);
@@ -74,7 +74,7 @@ public class AuthController {
         User user = userService.getUserByEmailAndToken(email, token.getTokenValue());
         LoginResponseDTO res = new LoginResponseDTO();
         res.setUserResponse(new LoginResponseDTO.UserResponse(user.getId(),user.getEmail()));
-        String accessToken = this.securityUtil.createAccessToken(email, res.getUserResponse());
+        String accessToken = this.securityUtil.createAccessToken(email);
         res.setAccessToken(accessToken);
         String refreshToken = this.securityUtil.createRefreshToken(email, res);
         refreshTokenService.updateRefreshToken(refreshToken, usernameCookie);
