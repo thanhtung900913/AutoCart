@@ -1,6 +1,7 @@
 package com.n2t.autocart.modules.account.entity;
 
 import com.n2t.autocart.modules.location.entity.Address;
+import com.n2t.autocart.modules.profile.entity.Customer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,4 +41,7 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserRole> userRoles = new LinkedHashSet<>();
+
+    @OneToOne(mappedBy = "user")
+    private Customer customer;
 }

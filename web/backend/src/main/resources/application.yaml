@@ -1,10 +1,12 @@
 spring:
   application:
     name: autocart
+  config:
+    import: optional:file:.env[.properties]
   datasource:
-    url: jdbc:postgresql://localhost:5432/autocart
-    username: development_admin
-    password: 900913
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -16,7 +18,7 @@ spring:
 
 auto-cart:
   jwt:
-    base64-secret: "C08kY54CYcqaJDipJLDrboMws/B3YlAno+Exu+KNCFA="
+    base64-secret: ${JWT_BASE64_SECRET}
     access-token-validity-in-seconds: 86400
     refresh-token-validity-in-seconds: 864000
 

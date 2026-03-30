@@ -1,11 +1,9 @@
 package com.n2t.autocart.modules.cart.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.n2t.autocart.modules.account.entity.User;
+import com.n2t.autocart.modules.profile.entity.Customer;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,4 +28,7 @@ public class Cart {
 
     @Column(name = "items_total", nullable = false)
     private Integer itemsTotal = 0;
+
+    @OneToOne(mappedBy = "cart")
+    private Customer customer;
 }
