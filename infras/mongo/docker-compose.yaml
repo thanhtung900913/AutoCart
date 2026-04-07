@@ -1,0 +1,15 @@
+services:
+  mongodb:
+    image: mongo:8.2
+    restart: always
+    container_name: autocart_mongo_db
+    networks:
+      - cdc_global_network
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./configs/mongo_init.js:/docker-entrypoint-initdb.d/mongo_init.js:ro
+      - ./data:/data/db
+networks:
+  cdc_global_network:
+    driver: bridge
