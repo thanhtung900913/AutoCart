@@ -240,6 +240,7 @@ List<Address> findAllActive();
 ## Anti-Patterns to Avoid
 
 ❌ **DO NOT**:
+- Suggest, prompt, or automatically execute test runs after code generation.
 - Use `@Autowired` field injection (use constructor injection instead)
 - Use `FetchType.EAGER` on relationships (causes N+1 query issues)
 - Throw generic `RuntimeException` (create custom exceptions for clarity)

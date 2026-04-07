@@ -1,0 +1,12 @@
+# Docker volumes / data
+**/data/
+**/volumes/
+**/postgres_data/
+**/mongodb_data/
+**/clickhouse-data/
+
+# Logs
+*.log
+
+# Env
+.env

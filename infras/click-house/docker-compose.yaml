@@ -1,0 +1,22 @@
+services:
+  clickhouse:
+      image: 'clickhouse/clickhouse-server'
+      container_name: clickhouse
+      # environment:
+      #     CLICKHOUSE_ALWAYS_RUN_INITDB_SCRIPTS: 1
+      ports:
+          - '8125:8123'
+          - '9056:9000'
+      volumes:
+          - ./configs/config.xml:/etc/clickhouse-server/config.xml
+          - ./configs/users.xml:/etc/clickhouse-server/users.xml
+          - ./configs/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+          - ./data:/var/lib/clickhouse
+      networks:
+          - cdc_global_network
+      restart: always
+      healthcheck:
+          test: wget --no-verbose --tries=1 --spider http://clickhouse:8123/ping || exit 1
+          interval: 10s
+          timeout: 5s
+          retries: 5
