@@ -1,0 +1,60 @@
+services:
+  storage-stream:
+    image: postgres:16-alpine
+    container_name: storage-stream
+    networks:
+        - cdc_global_network
+    ports:
+        - 15361:5432
+    environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+        - POSTGRES_DB=postgres
+    volumes:
+        - ./data/storage_stream:/data/postgres
+        - ./jobs/postgres.sql:/docker-entrypoint-initdb.d/postgres.sql:ro
+    restart: always
+    healthcheck:
+        test: ["CMD", "pg_isready", "-U", "postgres"]
+        interval: 5s
+        retries: 5
+  jobmanager:
+    # build: ./config
+    image: autocart/flink:1.18.1
+    container_name: flink_jobmanager
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        rest.port: 8081
+        parallelism.default: 1
+    volumes:
+      - ./data/checkpoints:/opt/flink/checkpoints
+      - ./data/savepoints:/opt/flink/savepoints
+    networks:
+      - cdc_global_network
+
+  taskmanager:
+    image: autocart/flink:1.18.1
+    container_name: flink_taskmanager
+    restart: unless-stopped
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 2
+        parallelism.default: 1
+    volumes:
+      - ./data/checkpoints:/opt/flink/checkpoints
+      - ./data/savepoints:/opt/flink/savepoints
+    networks:
+      - cdc_global_network
+
+networks:
+  cdc_global_network:
+    external: true
