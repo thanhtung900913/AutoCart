@@ -1,15 +1,52 @@
--- Bảng Dimension: dim_province
-CREATE TABLE dim_province (
-    id UInt32,
-    province_name String,
-    is_city UInt8,
+USE ecommerce;
+-- Bảng Chiều: Khách hàng (Từ bảng customers)
+CREATE TABLE dim_customer (
+    id Int64, -- Khớp với int8 của Postgres
+    fullname String,
+    phone String,
+    age Int32,
+    date_of_birth DateTime,
+    date_join DateTime,
     PRIMARY KEY (id)
-) ENGINE = MergeTree()
+) ENGINE = ReplacingMergeTree()
 ORDER BY id;
 
--- Bảng Dimension: dim_date
+-- Bảng Chiều: Người bán (Từ bảng vendors)
+CREATE TABLE dim_vendor (
+    id Int64,
+    name String,
+    phone String,
+    date_join Date,
+    PRIMARY KEY (id)
+) ENGINE = ReplacingMergeTree()
+ORDER BY id;
+
+-- Bảng Chiều: Sản phẩm (Từ bảng products + categories)
+CREATE TABLE dim_product (
+    product_id Int32,
+    product_name String,
+    brand String,
+    original_price Decimal(12, 2), -- Giữ nguyên độ chính xác tiền tệ
+    stock Int32,
+    category_id Int32, -- Sẽ được Flink enrich tên danh mục vào đây nếu cần
+    vendor_id Int64,
+    date_created Date,
+    PRIMARY KEY (product_id)
+) ENGINE = ReplacingMergeTree()
+ORDER BY product_id;
+
+-- Bảng Chiều: Khuyến mãi/Giảm giá (Từ bảng discounts)
+CREATE TABLE dim_discount (
+    discount_id Int32,
+    name String,
+    discount_percent Decimal(5, 2),
+    PRIMARY KEY (discount_id)
+) ENGINE = ReplacingMergeTree()
+ORDER BY discount_id;
+
+-- Bảng Chiều: Thời gian (Tự gen ra để phân tích theo quý, năm)
 CREATE TABLE dim_date (
-    id UInt32,
+    id Int32,
     full_date Date,
     day UInt8,
     month UInt8,
@@ -18,80 +55,43 @@ CREATE TABLE dim_date (
     day_of_week UInt8,
     week_of_year UInt8,
     is_weekend Boolean,
-    is_holiday String,
     PRIMARY KEY (id)
-) ENGINE = MergeTree()
+) ENGINE = ReplacingMergeTree()
 PARTITION BY toYYYYMM(full_date)
 ORDER BY id;
 
--- Bảng Dimension: dim_customer
-CREATE TABLE dim_customer (
-    id UInt32,
-    fullname String,
-    gender String,
-    date_of_birth DateTime,
-    date_join DateTime,
-    PRIMARY KEY (id)
-) ENGINE = MergeTree()
-ORDER BY id;
 
--- Bảng Dimension: dim_store
-CREATE TABLE dim_store (
-    id UInt32,
-    store_name String,
-    date_join DateTime,
-    PRIMARY KEY (id)
-) ENGINE = MergeTree()
-ORDER BY id;
+-- ==============================================================================
+-- 2. CÁC BẢNG FACT (SỰ KIỆN/GIAO DỊCH THỰC TẾ)
+-- Sử dụng MergeTree() và BẮT BUỘC Partition theo Tháng để tránh sập I/O ổ cứng
+-- ==============================================================================
 
--- Bảng Dimension: dim_promotion
-CREATE TABLE dim_promotion (
-    id UInt32,
-    name String,
-    discount_rate Float32,
-    PRIMARY KEY (id)
-) ENGINE = MergeTree()
-ORDER BY id;
-
--- Bảng Dimension: dim_product
-CREATE TABLE dim_product (
-    id UInt32,
-    name String,
-    brand String,
-    price Float64,
-    stock Int32,
-    category String,
-    PRIMARY KEY (id)
-) ENGINE = MergeTree()
-ORDER BY id;
-
--- Bảng Fact: fact_sales
+-- Bảng Fact: Doanh thu bán hàng (Kết hợp từ order_products và orders)
+-- Mỗi dòng tương ứng với 1 sản phẩm được bán ra trong 1 đơn hàng
 CREATE TABLE fact_sales (
-    id UInt32,
+    order_product_id Int32,
+    order_id Int32,
+    product_id Int32,
+    customer_id Int64,
     quantity Int32,
-    total_amount Float64,
-    status String,
-    date_id UInt32,
-    promotion_id Nullable(UInt32),
-    location_id UInt32,
-    product_id UInt32,
-    customer_id UInt32,
-    shop_id UInt32,
-    PRIMARY KEY (id)
+    price Decimal(12, 2),          -- Giá lúc mua của sản phẩm đó
+    order_total Decimal(12, 2),    -- Tổng giá trị của cả đơn hàng
+    order_status String,
+    order_date Date,
+    PRIMARY KEY (order_product_id)
 ) ENGINE = MergeTree()
-PARTITION BY (shop_id)
-ORDER BY id;
+PARTITION BY toYYYYMM(order_date) -- Gom thư mục vật lý theo từng tháng (VD: 202604)
+ORDER BY (order_date, product_id, customer_id); -- Optimize truy vấn thời gian và sản phẩm
 
--- Bảng Fact: fact_review
+-- Bảng Fact: Đánh giá sản phẩm (Từ bảng reviews)
 CREATE TABLE fact_review (
-    id UInt32,
-    content String,
-    rating Int32,
-    date_post DateTime,
-    product_id UInt32,
-    customer_id UInt32,
-    shop_id UInt32,
-    PRIMARY KEY (id)
+    review_id Int32,
+    product_id Int32,
+    customer_id Int64,
+    review_rating Int32,
+    review_content String,
+    review_date Date,
+    PRIMARY KEY (review_id)
 ) ENGINE = MergeTree()
-PARTITION BY (shop_id)
-ORDER BY id;
+PARTITION BY toYYYYMM(review_date)
+ORDER BY (review_date, product_id, review_rating);
