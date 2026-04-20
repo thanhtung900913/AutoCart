@@ -19,7 +19,7 @@ services:
   #       interval: 5s
   #       retries: 5
   jobmanager:
-    image: flink:2.2.0-java17
+    image: autocart/flink:1.18.1
     container_name: flink_jobmanager
     restart: unless-stopped
     ports:
@@ -33,17 +33,22 @@ services:
     volumes:
       - ./data/checkpoints:/opt/flink/checkpoints
       - ./data/savepoints:/opt/flink/savepoints
+      - ./config/flink-jobs/target:/opt/flink/usrlib
     networks:
       - cdc_global_network
 
   taskmanager:
-    image: flink:2.2.0-java17
+    image: autocart/flink:1.18.1
     container_name: flink_taskmanager
     restart: unless-stopped
     depends_on:
       - jobmanager
     command: taskmanager
     environment:
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      CLICKHOUSE_URL: ${CLICKHOUSE_URL}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       FLINK_PROPERTIES: |
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 2
@@ -51,6 +56,7 @@ services:
     volumes:
       - ./data/checkpoints:/opt/flink/checkpoints
       - ./data/savepoints:/opt/flink/savepoints
+      - ./config/flink-jobs/target:/opt/flink/usrlib
     networks:
       - cdc_global_network
 
